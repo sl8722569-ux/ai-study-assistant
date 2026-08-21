@@ -1,44 +1,19 @@
-# AI Study Assistant
+﻿# AI Study Assistant — INSAN CREATIONS
 
-A global AI Study Assistant that helps students learn, revise, practice, write documents, solve problems, and prepare for exams — adapting to languages, education systems, and learning styles.
+Working **website + installable app** on every device (PWA).
 
-**Focus:** help students *understand* concepts, not only dump answers.
+## Use it now (website)
+https://sl8722569-ux.github.io/ai-study-assistant/web/
 
-## Status
+## Install as an app
+- **Android:** Chrome → that URL → Install app / Add to Home Screen
+- **iPhone:** Safari → Share → Add to Home Screen
+- **Windows / Mac / Linux:** open the URL in Edge/Chrome → Install / App available
+- **Offline desktop copy:** `installers/windows/Install-StudyAssistant.bat` (or linux/macos scripts)
 
-Design approved (Rev 3.1). Implementation not started yet (Node.js required for app bootstrap).
+## Features in this build
+Study (explain), Practice, Write (essays/guides), Notes, Profile (language, board, grade, subject, level).
+Settings stay on the device. Practice is not an official exam.
 
-## Docs
-
-| Document | Description |
-|----------|-------------|
-| [`docs/PRODUCT_SPEC.md`](./docs/PRODUCT_SPEC.md) | Master product specification |
-| [`docs/DESIGN.md`](./docs/DESIGN.md) | Full system design + PR plan |
-
-## Planned stack
-
-- **Next.js** (App Router) + **TypeScript**
-- **SpaceXAI** (thin provider facade)
-- **Auth.js** (credentials + Google OAuth, database sessions)
-- **PostgreSQL** + Prisma
-- **Vercel** + **Inngest** (prod); Docker Compose for local
-
-## Getting started (soon)
-
-Once Node.js 20+ is installed:
-
-```bash
-# After PR-01 bootstrap
-npm install
-npm run dev
-```
-
-## Privacy & honesty
-
-- Ask permission before processing uploads; private files; user can delete data
-- Practice papers are **practice materials**, not official exams
-- Revision topics are **guidance**, not exam predictions
-
-## License
-
-TBD
+## Source
+This repo: web/ is the live app. docs/ remains the long-term product spec.

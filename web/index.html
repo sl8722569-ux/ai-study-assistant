@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>AI Study Assistant — INSAN CREATIONS</title>
+  <meta name="description" content="AI Study Assistant: learn, revise, practice, and write — on web, phone, and desktop." />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/study-assistant-32.png" />
+  <link rel="apple-touch-icon" href="icons/study-assistant-192.png" />
+  <meta name="theme-color" content="#0b1a3a" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <img src="icons/study-assistant-64.png" alt="" width="40" height="40" />
+    <div>
+      <h1>AI Study Assistant</h1>
+      <p>INSAN CREATIONS · app + website · all devices</p>
+    </div>
+    <button type="button" id="btn-install" hidden>Install app</button>
+  </header>
+
+  <nav>
+    <button data-tab="study" class="on">Study</button>
+    <button data-tab="practice">Practice</button>
+    <button data-tab="write">Write</button>
+    <button data-tab="notes">Notes</button>
+    <button data-tab="profile">Profile</button>
+  </nav>
+
+  <main>
+    <section id="study" class="tab on">
+      <label>Ask or name a topic</label>
+      <textarea id="topic" rows="3" placeholder="e.g. Explain photosynthesis for class 10 CBSE"></textarea>
+      <button type="button" id="go-study">Explain</button>
+      <article id="study-out" class="out"></article>
+    </section>
+
+    <section id="practice" class="tab">
+      <label>Practice topic</label>
+      <input id="quiz-topic" placeholder="e.g. linear equations" />
+      <button type="button" id="go-quiz">Generate practice</button>
+      <article id="quiz-out" class="out"></article>
+    </section>
+
+    <section id="write" class="tab">
+      <label>Document type</label>
+      <select id="doc-type">
+        <option>Essay</option><option>Report</option><option>Assignment</option>
+        <option>Study guide</option><option>Revision booklet</option>
+      </select>
+      <label>Title / prompt</label>
+      <input id="doc-title" placeholder="e.g. Climate change — short academic essay" />
+      <button type="button" id="go-write">Draft</button>
+      <article id="write-out" class="out"></article>
+    </section>
+
+    <section id="notes" class="tab">
+      <textarea id="note-in" rows="3" placeholder="Save a study note…"></textarea>
+      <button type="button" id="go-note">Save note</button>
+      <article id="notes-out" class="out"></article>
+    </section>
+
+    <section id="profile" class="tab">
+      <p class="hint">These settings stay on this device. They shape explanations to your curriculum.</p>
+      <label>Language</label>
+      <select id="lang"></select>
+      <label>Country</label>
+      <input id="country" placeholder="e.g. India" />
+      <label>Board / curriculum</label>
+      <input id="board" placeholder="e.g. CBSE, PSEB, ICSE" />
+      <label>Grade / class</label>
+      <input id="grade" placeholder="e.g. 10" />
+      <label>Subject</label>
+      <select id="subject"></select>
+      <label>Level</label>
+      <select id="level">
+        <option>Beginner</option><option selected>School</option>
+        <option>College</option><option>Competitive Exam</option><option>Professional</option>
+      </select>
+      <button type="button" id="save-profile">Save profile</button>
+      <p id="profile-msg" class="hint"></p>
+    </section>
+  </main>
+  <footer>INSAN CREATIONS · Understand first, then answers · Not official exam papers</footer>
+  <script src="app.js"></script>
+</body>
+</html>
