@@ -52,7 +52,7 @@
     const c = ctx();
     const t = topic.trim() || c.subject;
     return (
-      "AI Study Assistant — explanation (understand first)\n\n" +
+      "AI Study Assistant — study outline (template, not a language model)\n\n" +
       "Topic: " + t + "\n" +
       "For: " + c.grade + " · " + c.board + " · " + c.country + " · " + c.subject + " · " + c.level + "\n" +
       "Language preference: " + c.lang + "\n\n" +
