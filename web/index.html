@@ -33,14 +33,14 @@
     <section id="study" class="tab on">
       <label>Ask or name a topic</label>
       <textarea id="topic" rows="3" placeholder="e.g. Explain photosynthesis for class 10 CBSE"></textarea>
-      <button type="button" id="go-study">Study outline (templates, not an AI model)</button>
+      <button type="button" id="go-study">Study (SpaceXAI if Bridge is on, else templates)</button>
       <article id="study-out" class="out"></article>
     </section>
 
     <section id="practice" class="tab">
       <label>Practice topic</label>
       <input id="quiz-topic" placeholder="e.g. linear equations" />
-      <button type="button" id="go-quiz">Practice prompts (templates)</button>
+      <button type="button" id="go-quiz">Practice (SpaceXAI if Bridge is on)</button>
       <article id="quiz-out" class="out"></article>
     </section>
 
@@ -52,7 +52,7 @@
       </select>
       <label>Title / prompt</label>
       <input id="doc-title" placeholder="e.g. Climate change — short academic essay" />
-      <button type="button" id="go-write">Draft skeleton (templates)</button>
+      <button type="button" id="go-write">Draft (SpaceXAI if Bridge is on)</button>
       <article id="write-out" class="out"></article>
     </section>
 
@@ -79,11 +79,15 @@
         <option>Beginner</option><option selected>School</option>
         <option>College</option><option>Competitive Exam</option><option>Professional</option>
       </select>
+      <label>INSAN Bridge URL (SpaceXAI stays on your PC)</label>
+      <input id="bridge-url" placeholder="http://127.0.0.1:8787" />
       <button type="button" id="save-profile">Save profile</button>
       <p id="profile-msg" class="hint"></p>
+      <p id="ai-st" class="hint">SpaceXAI: checking…</p>
     </section>
   </main>
   <footer>INSAN CREATIONS · Understand first, then answers · Not official exam papers</footer>
+  <script src="bridge-client.js"></script>
   <script src="app.js"></script>
   <script src="https://sl8722569-ux.github.io/insan-creations/js/stats.js" data-app="study-assistant"></script>
 </body>

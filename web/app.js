@@ -45,8 +45,18 @@
   $("save-profile").onclick = () => {
     const p = ctx();
     localStorage.setItem("asa-profile", JSON.stringify(p));
+    if (window.INSAN_BRIDGE && $("bridge-url").value) window.INSAN_BRIDGE.setUrl($("bridge-url").value);
     $("profile-msg").textContent = "Profile saved on this device.";
   };
+  (async function bridgeChip() {
+    if ($("bridge-url") && window.INSAN_BRIDGE) $("bridge-url").value = window.INSAN_BRIDGE.url();
+    const el = $("ai-st");
+    if (!el || !window.INSAN_BRIDGE) return;
+    const found = await window.INSAN_BRIDGE.find();
+    el.textContent = found && found.health.ai
+      ? "SpaceXAI: connected (" + (found.health.model || "") + ")"
+      : (found ? "Bridge on, but XAI_API_KEY missing — templates until you set the key." : "SpaceXAI: offline. Run INSAN Bridge on the PC.");
+  })();
 
   function explain(topic) {
     const c = ctx();
@@ -98,9 +108,45 @@
     );
   }
 
-  $("go-study").onclick = () => { $("study-out").textContent = explain($("topic").value); };
-  $("go-quiz").onclick = () => { $("quiz-out").textContent = quiz($("quiz-topic").value); };
-  $("go-write").onclick = () => { $("write-out").textContent = draft($("doc-type").value, $("doc-title").value); };
+  async function withAi(app, prompt, fallback, outId) {
+    $(outId).textContent = "Working…";
+    if (window.INSAN_BRIDGE) {
+      try {
+        const found = await window.INSAN_BRIDGE.find();
+        if (found && found.health.ai) {
+          const text = await window.INSAN_BRIDGE.chat("study", prompt);
+          $(outId).textContent = text + "\n\n— SpaceXAI via INSAN Bridge (" + (found.health.model || "grok") + "). Not an official exam paper.";
+          return;
+        }
+      } catch (e) {
+        $(outId).textContent = "SpaceXAI error: " + e.message + "\n\nFalling back to templates.\n\n" + fallback;
+        return;
+      }
+    }
+    $(outId).textContent = fallback + "\n\n(Start INSAN Bridge with XAI_API_KEY for SpaceXAI.)";
+  }
+  $("go-study").onclick = () => {
+    const t = $("topic").value;
+    const c = ctx();
+    withAi("study",
+      "Explain this for a student. Board " + c.board + ", grade " + c.grade + ", country " + c.country + ", subject " + c.subject + ", language " + c.lang + ", level " + c.level + ".\nTopic: " + (t || c.subject),
+      explain(t), "study-out");
+  };
+  $("go-quiz").onclick = () => {
+    const t = $("quiz-topic").value;
+    const c = ctx();
+    withAi("study",
+      "Write 5 practice questions (not an official paper) for " + c.board + " grade " + c.grade + " " + c.subject + " in " + c.lang + ". Topic: " + (t || c.subject),
+      quiz(t), "quiz-out");
+  };
+  $("go-write").onclick = () => {
+    const title = $("doc-title").value;
+    const type = $("doc-type").value;
+    const c = ctx();
+    withAi("study",
+      "Draft a " + type + " titled '" + (title || type) + "' for a " + c.grade + " " + c.subject + " student (" + c.board + ", " + c.lang + "). Academic tone. Student must still edit it in their own words.",
+      draft(type, title), "write-out");
+  };
 
   function loadNotes() {
     const notes = JSON.parse(localStorage.getItem("asa-notes") || "[]");
