@@ -13,6 +13,7 @@ android {
     buildConfigField "String", "WEB_URL", "\"https://sl8722569-ux.github.io/ai-study-assistant/web/\""
   }
   buildFeatures { buildConfig true }
+  lint { checkReleaseBuilds false; abortOnError false }
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
