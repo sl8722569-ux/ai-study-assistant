@@ -1,26 +1,5 @@
 (function () {
-  const LANGS = ["English","Hindi","Punjabi","Spanish","French","German","Arabic","Chinese","Japanese","Korean","Russian","Portuguese","Bengali","Tamil","Telugu","Marathi","Gujarati","Urdu"];
-  const SUBJECTS = ["Mathematics","Physics","Chemistry","Biology","Computer Science","English","Social Science","History","Geography","Economics","Business Studies","Accountancy","General Knowledge"];
-
   const $ = (id) => document.getElementById(id);
-  const profile = JSON.parse(localStorage.getItem("asa-profile") || "{}");
-
-  LANGS.forEach((l) => {
-    const o = document.createElement("option");
-    o.value = o.textContent = l;
-    if ((profile.lang || "English") === l) o.selected = true;
-    $("lang").appendChild(o);
-  });
-  SUBJECTS.forEach((s) => {
-    const o = document.createElement("option");
-    o.value = o.textContent = s;
-    if ((profile.subject || "Mathematics") === s) o.selected = true;
-    $("subject").appendChild(o);
-  });
-  $("country").value = profile.country || "India";
-  $("board").value = profile.board || "CBSE";
-  $("grade").value = profile.grade || "10";
-  $("level").value = profile.level || "School";
 
   document.querySelectorAll("nav button").forEach((b) => {
     b.onclick = () => {
@@ -31,137 +10,88 @@
     };
   });
 
-  function ctx() {
-    return {
-      lang: $("lang").value,
-      country: $("country").value || "your country",
-      board: $("board").value || "your board",
-      grade: $("grade").value || "your grade",
-      subject: $("subject").value,
-      level: $("level").value,
-    };
+  function say(who, text) {
+    const p = document.createElement("p");
+    p.innerHTML = "<b>" + who + "</b><br>" + String(text).replace(/[&<>]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c];
+    });
+    $("chat-log").appendChild(p);
+    $("chat-log").scrollTop = $("chat-log").scrollHeight;
   }
 
-  $("save-profile").onclick = () => {
-    const p = ctx();
-    localStorage.setItem("asa-profile", JSON.stringify(p));
-    if (window.INSAN_BRIDGE && $("bridge-url").value) window.INSAN_BRIDGE.setUrl($("bridge-url").value);
-    $("profile-msg").textContent = "Profile saved on this device.";
-  };
-  (async function bridgeChip() {
-    if ($("bridge-url") && window.INSAN_BRIDGE) $("bridge-url").value = window.INSAN_BRIDGE.url();
-    const el = $("ai-st");
-    if (!el || !window.INSAN_BRIDGE) return;
-    const found = await window.INSAN_BRIDGE.find();
-    el.textContent = found && found.health.ai
-      ? "SpaceXAI: connected (" + (found.health.model || "") + ")"
-      : (found ? "Bridge on, but XAI_API_KEY missing — templates until you set the key." : "SpaceXAI: offline. Run INSAN Bridge on the PC.");
-  })();
-
-  function explain(topic) {
-    const c = ctx();
-    const t = topic.trim() || c.subject;
-    return (
-      "AI Study Assistant — study outline (template, not a language model)\n\n" +
-      "Topic: " + t + "\n" +
-      "For: " + c.grade + " · " + c.board + " · " + c.country + " · " + c.subject + " · " + c.level + "\n" +
-      "Language preference: " + c.lang + "\n\n" +
-      "1) Simple idea\n" +
-      "Think of “" + t + "” as one main question: what is changing, and why does it matter in " + c.subject + "?\n\n" +
-      "2) School-level picture\n" +
-      "Break it into parts you can name. For each part, say what it does in one sentence. Use " + c.board + " terms if you know them.\n\n" +
-      "3) Check you understood\n" +
-      "• Can you teach this to a friend in " + c.lang + " without the book?\n" +
-      "• What would go wrong if one part was missing?\n\n" +
-      "4) Next step\n" +
-      "Open Practice and generate questions on this topic. This is guidance, not an official exam paper.\n\n" +
-      "Tip: write what you still don’t get in Notes, then ask again with that doubt."
-    );
-  }
-
-  function quiz(topic) {
-    const t = topic.trim() || ctx().subject;
-    const c = ctx();
-    return (
-      "Practice set — " + t + " (" + c.level + ", " + c.board + " " + c.grade + ")\n" +
-      "Practice material only — not an official paper.\n\n" +
-      "Q1. In one sentence, what is " + t + "?\n" +
-      "Q2. Name two parts or steps inside it.\n" +
-      "Q3. Give one everyday example that fits " + c.country + " life.\n" +
-      "Q4. What mistake do students often make here?\n" +
-      "Q5. Write a 4-line answer as if this is a " + c.board + " exam.\n\n" +
-      "Self-check: hide this screen and answer aloud in " + c.lang + "."
-    );
-  }
-
-  function draft(type, title) {
-    const c = ctx();
-    const t = title.trim() || type;
-    return (
-      type + " draft — " + t + "\n" +
-      "Style: academic / " + c.level + " · " + c.lang + "\n\n" +
-      "Title: " + t + "\n\n" +
-      "Introduction\nState the topic and why a " + c.grade + " " + c.subject + " student should care.\n\n" +
-      "Body\nParagraph 1: definition / main idea.\nParagraph 2: how it works or why it happens.\nParagraph 3: example + one counterpoint.\n\n" +
-      "Conclusion\nRestate the idea in simpler words. One sentence on what to revise next.\n\n" +
-      "Edit this draft in your own words so it is honestly yours."
-    );
-  }
-
-  async function withAi(app, prompt, fallback, outId) {
-    $(outId).textContent = "Working…";
+  async function ask(prompt, fallback) {
     if (window.INSAN_BRIDGE) {
       try {
         const found = await window.INSAN_BRIDGE.find();
         if (found && found.health.ai) {
-          const text = await window.INSAN_BRIDGE.chat("study", prompt);
-          $(outId).textContent = text + "\n\n— SpaceXAI via INSAN Bridge (" + (found.health.model || "grok") + "). Not an official exam paper.";
-          return;
+          return await window.INSAN_BRIDGE.chat("study", prompt);
         }
       } catch (e) {
-        $(outId).textContent = "SpaceXAI error: " + e.message + "\n\nFalling back to templates.\n\n" + fallback;
-        return;
+        return "SpaceXAI error: " + e.message + "\n\n" + fallback;
       }
     }
-    $(outId).textContent = fallback + "\n\n(Start INSAN Bridge with XAI_API_KEY for SpaceXAI.)";
+    return fallback + "\n\n(Start INSAN Bridge with XAI_API_KEY for a real model.)";
   }
-  $("go-study").onclick = () => {
-    const t = $("topic").value;
-    const c = ctx();
-    withAi("study",
-      "Explain this for a student. Board " + c.board + ", grade " + c.grade + ", country " + c.country + ", subject " + c.subject + ", language " + c.lang + ", level " + c.level + ".\nTopic: " + (t || c.subject),
-      explain(t), "study-out");
-  };
-  $("go-quiz").onclick = () => {
-    const t = $("quiz-topic").value;
-    const c = ctx();
-    withAi("study",
-      "Write 5 practice questions (not an official paper) for " + c.board + " grade " + c.grade + " " + c.subject + " in " + c.lang + ". Topic: " + (t || c.subject),
-      quiz(t), "quiz-out");
-  };
-  $("go-write").onclick = () => {
-    const title = $("doc-title").value;
-    const type = $("doc-type").value;
-    const c = ctx();
-    withAi("study",
-      "Draft a " + type + " titled '" + (title || type) + "' for a " + c.grade + " " + c.subject + " student (" + c.board + ", " + c.lang + "). Academic tone. Student must still edit it in their own words.",
-      draft(type, title), "write-out");
+
+  function localChat(q) {
+    const low = q.toLowerCase();
+    if (/quiz/.test(low)) return "Quiz (template): 1) What is the main idea? 2) Give one example. 3) What would go wrong if a part was missing? Hide this screen and answer aloud.";
+    if (/translat/.test(low)) return "I can translate when SpaceXAI is on. Paste the line and name the target language.";
+    if (/sky blue/.test(low)) return "Short version: air scatters short (blue) wavelengths of sunlight more than long ones, so the sky looks blue in daytime.";
+    return "Template reply for “" + q + "”. I will explain in simple words, then give one check-question. Turn on INSAN Bridge for a full answer.";
+  }
+
+  say("Assistant", "Hi. No class/board setup. Chat normally, or open Assignments.");
+
+  $("chat-f").onsubmit = async (e) => {
+    e.preventDefault();
+    const v = $("chat-q").value.trim();
+    if (!v) return;
+    say("You", v);
+    $("chat-q").value = "";
+    say("Assistant", "…");
+    const text = await ask(v, localChat(v));
+    $("chat-log").lastChild.innerHTML = "<b>Assistant</b><br>" + text.replace(/[&<>]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c];
+    });
   };
 
-  function loadNotes() {
-    const notes = JSON.parse(localStorage.getItem("asa-notes") || "[]");
-    $("notes-out").textContent = notes.length ? notes.join("\n\n") : "No notes yet.";
-  }
-  $("go-note").onclick = () => {
-    const t = $("note-in").value.trim();
-    if (!t) return;
-    const notes = JSON.parse(localStorage.getItem("asa-notes") || "[]");
-    notes.unshift(new Date().toLocaleString() + "\n" + t);
-    localStorage.setItem("asa-notes", JSON.stringify(notes.slice(0, 40)));
-    $("note-in").value = "";
-    loadNotes();
+  $("asg-file").onchange = () => {
+    const f = $("asg-file").files && $("asg-file").files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      $("asg-text").value = ($("asg-text").value + "\n\n" + reader.result).trim();
+    };
+    reader.readAsText(f);
   };
-  loadNotes();
+
+  async function runAsg(mode) {
+    const body = $("asg-text").value.trim();
+    if (!body) {
+      $("asg-out").textContent = "Paste the assignment first.";
+      return;
+    }
+    const attempt = $("asg-attempt").value.trim();
+    const prompt = {
+      explain: "Explain this assignment clearly. Not an official mark scheme.\n\n" + body,
+      steps: "Solve step by step. Show reasoning. Student must still write their own final copy.\n\n" + body,
+      hint: "Give hints only. Do not dump the full final answer.\n\n" + body,
+      check: "Check this student's attempt. Point out mistakes and how to fix them.\n\nAssignment:\n" + body + "\n\nAttempt:\n" + (attempt || "(none)")
+    }[mode];
+    const fallback = {
+      explain: "Explain: name the topic, the question being asked, and the first idea to write.\n\n" + body.slice(0, 400),
+      steps: "Step 1: restate the question.\nStep 2: list what you know.\nStep 3: apply one rule.\nStep 4: check units/sense.\n\n" + body.slice(0, 400),
+      hint: "Hint: identify the chapter idea first. Do not look up a full key yet.",
+      check: attempt ? "Compare your steps to the method in class. Circle any jump in logic." : "Paste your attempt so I can check it."
+    }[mode];
+    $("asg-out").textContent = "Working…";
+    $("asg-out").textContent = await ask(prompt, fallback);
+  }
+  $("asg-explain").onclick = () => runAsg("explain");
+  $("asg-steps").onclick = () => runAsg("steps");
+  $("asg-hint").onclick = () => runAsg("hint");
+  $("asg-check").onclick = () => runAsg("check");
 
   let deferred;
   window.addEventListener("beforeinstallprompt", (e) => {
@@ -169,14 +99,18 @@
     deferred = e;
     $("btn-install").hidden = false;
   });
-  $("btn-install").onclick = async () => {
-    if (!deferred) return;
-    deferred.prompt();
-    deferred = null;
-    $("btn-install").hidden = true;
-  };
+  $("btn-install").onclick = () => { if (deferred) deferred.prompt(); };
 
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js").catch(() => {});
-  }
+  (async function () {
+    if (!window.INSAN_BRIDGE) {
+      $("ai-st").textContent = "Local templates. Run INSAN Bridge for SpaceXAI.";
+      return;
+    }
+    const found = await window.INSAN_BRIDGE.find();
+    $("ai-st").textContent = found && found.health.ai
+      ? "SpaceXAI connected. Chat like a normal AI."
+      : "Bridge offline — templates until you start INSAN Bridge.";
+  })();
+
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 })();
